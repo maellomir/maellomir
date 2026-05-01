@@ -6,7 +6,7 @@ Hi there 👋
 My education:
   - Master's degree in Computational biology and bioinformatics received in Novosibirsk State University (NSU).
   - Bachelor's degree in Biology received in Tomsk State University (TSU).
-  - 
+    
 <br>
           
 My Tech Stack:
