@@ -1,17 +1,20 @@
 Hi there 👋
 ---
 :mortar_board: I'm currently a PhD student at [Sirius University of Science and Technology](https://www.siriusuniversity.ru/eng) and engaged in research in the field of computational biology and mathematical modeling. At the moment, I'm studying data analysis and machine learning.
-<br><br>
 
-My education:
+🔗 **Links:** [Online CV](https://maellomir.github.io/cv/) · [PDF CV](https://maellomir.github.io/cv/cv-pdf.pdf) · [ORCID](https://orcid.org/0009-0008-0843-6083)
+
+#### My education:
   - Master's degree in Computational biology and bioinformatics received in Novosibirsk State University (NSU).
   - Bachelor's degree in Biology received in Tomsk State University (TSU).
+    
+#### Research interests
 
-<br><br>
-- [Online CV](https://maellomir.github.io/cv/)
-- [PDF version](https://maellomir.github.io/cv/cv-pdf.pdf)
-- 
-<br>
+- Mathematical modeling of biological systems
+- Systems biology
+- Immune response dynamics
+- Regulated cell death
+- Computational biology and bioinformatics
           
 My Tech Stack:
 ---
