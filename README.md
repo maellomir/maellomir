@@ -6,7 +6,11 @@ Hi there 👋
 My education:
   - Master's degree in Computational biology and bioinformatics received in Novosibirsk State University (NSU).
   - Bachelor's degree in Biology received in Tomsk State University (TSU).
-    
+
+<br><br>
+- [Online CV](https://maellomir.github.io/cv/)
+- [PDF version](https://maellomir.github.io/cv/cv-pdf.pdf)
+- 
 <br>
           
 My Tech Stack:
