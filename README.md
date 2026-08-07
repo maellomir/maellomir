@@ -16,8 +16,26 @@ Hi there 👋
 - Regulated cell death
 - Computational biology and bioinformatics
 
+---
 
-<img src="https://leetcard.jacoblin.cool/maellomir?theme=dark&font=Inter&ext=heatmap" width="280" />
+<h3>Coding Practice</h3>
+
+<p>
+  <a href="https://leetcode.com/u/maellomir/">
+    <img
+      src="https://leetcard.jacoblin.cool/maellomir?theme=dark&font=Inter&ext=heatmap"
+      width="37%"
+      alt="LeetCode Stats"
+    />
+  </a>
+  <a href="https://platform.stratascratch.com/user/Elloquse">
+    <img
+      src="https://raw.githubusercontent.com/maellomir/maellomir/main/stratascratch.svg"
+      width="39%"
+      alt="StrataScratch Stats"
+    />
+  </a>
+</p>
 
 My Tech Stack:
 ---
