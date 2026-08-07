@@ -28,7 +28,7 @@ Hi there 👋
       alt="LeetCode Stats"
     />
   </a>
-  <a href="https://platform.stratascratch.com/user/Elloquse">
+  <a href="https://platform.stratascratch.com/user/maellomir">
     <img
       src="https://raw.githubusercontent.com/maellomir/maellomir/main/stratascratch.svg"
       width="39%"
