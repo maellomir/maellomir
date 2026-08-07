@@ -15,7 +15,9 @@ Hi there 👋
 - Immune response dynamics
 - Regulated cell death
 - Computational biology and bioinformatics
-          
+
+[![LeetCode Stats](https://leetcode-stats-card.vercel.app/get?username=maellomir&theme=nord)](https://leetcode.com/maellomir)
+		  
 My Tech Stack:
 ---
 <div >
