@@ -96,8 +96,18 @@ jobs:
 
           with urllib.request.urlopen(req) as resp:
               result = json.load(resp)
-
-          analytics = result["data"]["analytics"]
+          
+          if result.get("errors"):
+              print("StrataScratch API returned errors:")
+              print(json.dumps(result, indent=2))
+              raise RuntimeError("StrataScratch API error")
+          
+          analytics = result.get("data", {}).get("analytics")
+          
+          if analytics is None:
+              print("Unexpected StrataScratch response:")
+              print(json.dumps(result, indent=2))
+              raise RuntimeError("StrataScratch analytics returned null")
 
           solved_by_type = json.loads(analytics["solvedByType"])
           total_solved = solved_by_type.get("total", 0)
