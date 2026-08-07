@@ -189,7 +189,6 @@ jobs:
           svg.append('<circle cx="83" cy="152" r="46" fill="none" stroke="#30363d" stroke-width="8"/>')
           svg.append(f'<circle cx="83" cy="152" r="{r}" fill="none" stroke="#f0b454" stroke-width="8" stroke-linecap="round" stroke-dasharray="{dash:.2f} {circ:.2f}" transform="rotate(-90 83 152)"/>')
           svg.append(f'<text x="83" y="160" text-anchor="middle" class="ringnum">{analytical_solved}</text>')
-          svg.append('<text x="83" y="184" text-anchor="middle" class="ringsub">Analytical</text>')
 
           # difficulty bars
           bar_x = 190
