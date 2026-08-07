@@ -181,7 +181,7 @@ jobs:
           svg.append('<circle cx="32" cy="34" r="4.5" fill="#0d1117"/>')
 
           # header
-          svg.append(f'<text x="56" y="41" class="title">{USERNAME}</text>')
+          svg.append(f'<text x="56" y="41" class="title">StrataScratch · {USERNAME}</text>')
           svg.append(f'<text x="605" y="38" text-anchor="end" class="headline">{total_solved} solved</text>')
           svg.append(f'<text x="605" y="60" text-anchor="end" class="meta">{analytical_solved} analytical · {algorithms_solved} algorithm</text>')
 
