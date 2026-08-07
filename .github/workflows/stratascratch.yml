@@ -23,8 +23,6 @@ jobs:
 
       - name: Generate StrataScratch card
         run: |
-                - name: Generate StrataScratch card
-        run: |
           python <<'PY'
           import json
           import math
