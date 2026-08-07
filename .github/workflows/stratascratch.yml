@@ -1,0 +1,253 @@
+name: Update StrataScratch Card
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate StrataScratch card
+        run: |
+          python <<'PY'
+          import json
+          import math
+          import urllib.request
+          from datetime import date, timedelta
+
+          USERNAME = "Elloquse"
+          API = "https://api.stratascratch.com/graphql/"
+
+          today = date.today()
+          start_day = today - timedelta(days=363)  # 52 weeks = 364 days
+
+          query = """
+          query InterviewProgress(
+            $username: String!,
+            $questionClass: QuestionClassEnum!,
+            $startDate: Date,
+            $endDate: Date
+          ) {
+            analytics(username: $username) {
+              id
+              solvedByType
+              byClass(questionClass: $questionClass) {
+                all {
+                  all
+                  easy
+                  medium
+                  hard
+                }
+                solved {
+                  all
+                  easy
+                  medium
+                  hard
+                }
+              }
+              solvedByDate(
+                questionClass: $questionClass
+                startDate: $startDate
+                endDate: $endDate
+              ) {
+                date
+                count
+              }
+            }
+          }
+          """
+
+          payload = {
+              "operationName": "InterviewProgress",
+              "variables": {
+                  "username": USERNAME,
+                  "questionClass": "ANALYTICAL",
+                  "startDate": start_day.isoformat(),
+                  "endDate": today.isoformat(),
+              },
+              "query": query,
+          }
+
+          req = urllib.request.Request(
+              API,
+              data=json.dumps(payload).encode("utf-8"),
+              headers={
+                  "Content-Type": "application/json",
+                  "Origin": "https://platform.stratascratch.com",
+                  "Referer": "https://platform.stratascratch.com/",
+                  "User-Agent": "Mozilla/5.0",
+              },
+              method="POST",
+          )
+
+          with urllib.request.urlopen(req) as resp:
+              result = json.load(resp)
+
+          analytics = result["data"]["analytics"]
+
+          solved_by_type = json.loads(analytics["solvedByType"])
+          total_solved = solved_by_type.get("total", 0)
+          analytical_solved = solved_by_type.get("analytics", 0)
+          algorithms_solved = solved_by_type.get("algorithms", 0)
+
+          all_stats = analytics["byClass"]["all"]
+          solved_stats = analytics["byClass"]["solved"]
+
+          easy_solved = solved_stats["easy"]
+          medium_solved = solved_stats["medium"]
+          hard_solved = solved_stats["hard"]
+
+          easy_all = all_stats["easy"]
+          medium_all = all_stats["medium"]
+          hard_all = all_stats["hard"]
+          analytical_all = all_stats["all"]
+
+          # Activity map
+          counts = {
+              date.fromisoformat(item["date"]): item["count"]
+              for item in analytics["solvedByDate"]
+              if item["count"] > 0
+          }
+
+          # Current streak
+          cursor = today if counts.get(today, 0) > 0 else today - timedelta(days=1)
+          streak = 0
+          while counts.get(cursor, 0) > 0:
+              streak += 1
+              cursor -= timedelta(days=1)
+
+          max_count = max(counts.values(), default=0)
+
+          def heat_color(c):
+              if c <= 0:
+                  return "#1b1f24"
+              if max_count <= 1:
+                  return "#7bc96f"
+              ratio = c / max_count
+              if ratio <= 0.25:
+                  return "#0e4429"
+              elif ratio <= 0.50:
+                  return "#2f7d32"
+              elif ratio <= 0.75:
+                  return "#5aa85a"
+              else:
+                  return "#7bc96f"
+
+          def progress_width(solved, total, width):
+              if total <= 0:
+                  return 0
+              return max(0, min(width, width * solved / total))
+
+          def fmt_date(d):
+              return f"{d.year}.{d.month}.{d.day}"
+
+          # Circular progress for analytical solved / analytical total
+          r = 46
+          circ = 2 * math.pi * r
+          ratio = analytical_solved / analytical_all if analytical_all else 0
+          dash = circ * ratio
+
+          width = 640
+          height = 375
+
+          svg = []
+          svg.append(f'''<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">''')
+          svg.append("""
+            <style>
+              .title { font: 700 22px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
+              .topmain { font: 700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
+              .topsub { font: 13px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #8b949e; }
+              .ringnum { font: 700 30px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
+              .ringsub { font: 13px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #8b949e; }
+              .label { font: 700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
+              .value { font: 700 16px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
+              .heatTitle { font: 700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
+              .tiny { font: 13px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #8b949e; }
+            </style>
+          """)
+          svg.append('<rect x="0.5" y="0.5" width="639" height="374" rx="8" fill="#0d1117" stroke="#30363d"/>')
+
+          # Top icon (neutral accent, not logo copy)
+          svg.append('<circle cx="32" cy="34" r="11" fill="#ffb454"/>')
+          svg.append('<circle cx="32" cy="34" r="4.5" fill="#0d1117"/>')
+
+          # Header
+          svg.append(f'<text x="56" y="41" class="title">{USERNAME}</text>')
+          svg.append(f'<text x="605" y="38" text-anchor="end" class="topmain">{total_solved} solved</text>')
+          svg.append(f'<text x="605" y="58" text-anchor="end" class="topsub">{analytical_solved} analytical · {algorithms_solved} algorithm</text>')
+
+          # Left ring
+          svg.append('<circle cx="83" cy="152" r="46" fill="none" stroke="#30363d" stroke-width="8"/>')
+          svg.append(f'<circle cx="83" cy="152" r="{r}" fill="none" stroke="#ffb454" stroke-width="8" stroke-linecap="round" stroke-dasharray="{dash:.2f} {circ:.2f}" transform="rotate(-90 83 152)"/>')
+          svg.append(f'<text x="83" y="160" text-anchor="middle" class="ringnum">{analytical_solved}</text>')
+          svg.append('<text x="83" y="182" text-anchor="middle" class="ringsub">Analytical</text>')
+
+          # Difficulty bars
+          bar_x = 190
+          bar_w = 350
+          bg = "#3b4048"
+
+          rows = [
+              ("Easy", easy_solved, easy_all, "#6cc46e", 110),
+              ("Medium", medium_solved, medium_all, "#f0b44c", 160),
+              ("Hard", hard_solved, hard_all, "#ef6b73", 210),
+          ]
+
+          for name, solved_n, total_n, color, y in rows:
+              svg.append(f'<text x="{bar_x}" y="{y}" class="label">{name}</text>')
+              svg.append(f'<text x="{bar_x + bar_w}" y="{y}" text-anchor="end" class="value">{solved_n} / {total_n}</text>')
+              svg.append(f'<rect x="{bar_x}" y="{y + 12}" width="{bar_w}" height="6" rx="3" fill="{bg}"/>')
+              svg.append(f'<rect x="{bar_x}" y="{y + 12}" width="{progress_width(solved_n, total_n, bar_w):.2f}" height="6" rx="3" fill="{color}"/>')
+
+          # Separator
+          svg.append('<line x1="20" y1="252" x2="620" y2="252" stroke="#30363d"/>')
+
+          # Heatmap header
+          svg.append('<text x="20" y="285" class="heatTitle">Heatmap (Last 52 Weeks)</text>')
+          svg.append(f'<text x="620" y="285" text-anchor="end" class="tiny">🔥 {streak} day streak</text>')
+
+          # Heatmap cells
+          cell = 7
+          gap = 2
+          grid_x = 20
+          grid_y = 303
+
+          days = [start_day + timedelta(days=i) for i in range(364)]
+          for idx, d in enumerate(days):
+              col = idx // 7
+              row = idx % 7
+              x = grid_x + col * (cell + gap)
+              y = grid_y + row * (cell + gap)
+              c = counts.get(d, 0)
+              svg.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="1.5" fill="{heat_color(c)}"/>')
+
+          svg.append(f'<text x="{grid_x}" y="363" class="tiny">{fmt_date(start_day)}</text>')
+          svg.append(f'<text x="{grid_x + 52 * (cell + gap) - gap}" y="363" text-anchor="end" class="tiny">{fmt_date(today)}</text>')
+
+          svg.append('</svg>')
+
+          with open("stratascratch.svg", "w", encoding="utf-8") as f:
+              f.write("".join(svg))
+          PY
+
+      - name: Commit updated SVG
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stratascratch.svg
+          git diff --cached --quiet || git commit -m "Update StrataScratch card"
+          git push
