@@ -23,6 +23,8 @@ jobs:
 
       - name: Generate StrataScratch card
         run: |
+                - name: Generate StrataScratch card
+        run: |
           python <<'PY'
           import json
           import math
@@ -33,7 +35,7 @@ jobs:
           API = "https://api.stratascratch.com/graphql/"
 
           today = date.today()
-          start_day = today - timedelta(days=363)  # 52 weeks = 364 days
+          start_day = today - timedelta(days=363)  # 52 weeks
 
           query = """
           query InterviewProgress(
@@ -116,14 +118,13 @@ jobs:
           hard_all = all_stats["hard"]
           analytical_all = all_stats["all"]
 
-          # Activity map
           counts = {
               date.fromisoformat(item["date"]): item["count"]
               for item in analytics["solvedByDate"]
               if item["count"] > 0
           }
 
-          # Current streak
+          # current streak
           cursor = today if counts.get(today, 0) > 0 else today - timedelta(days=1)
           streak = 0
           while counts.get(cursor, 0) > 0:
@@ -152,59 +153,55 @@ jobs:
                   return 0
               return max(0, min(width, width * solved / total))
 
-          def fmt_date(d):
-              return f"{d.year}.{d.month}.{d.day}"
-
-          # Circular progress for analytical solved / analytical total
+          # ring progress
           r = 46
           circ = 2 * math.pi * r
           ratio = analytical_solved / analytical_all if analytical_all else 0
           dash = circ * ratio
 
           width = 640
-          height = 375
+          height = 390
 
           svg = []
-          svg.append(f'''<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">''')
+          svg.append(f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">')
           svg.append("""
             <style>
               .title { font: 700 22px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
-              .topmain { font: 700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
-              .topsub { font: 13px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #8b949e; }
+              .headline { font: 700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
+              .meta { font: 400 14px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #8b949e; }
               .ringnum { font: 700 30px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
-              .ringsub { font: 13px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #8b949e; }
+              .ringsub { font: 400 12px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #8b949e; }
               .label { font: 700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
               .value { font: 700 16px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
               .heatTitle { font: 700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #f0f6fc; }
-              .tiny { font: 13px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; fill: #8b949e; }
             </style>
           """)
-          svg.append('<rect x="0.5" y="0.5" width="639" height="374" rx="8" fill="#0d1117" stroke="#30363d"/>')
+          svg.append('<rect x="0.5" y="0.5" width="639" height="389" rx="12" fill="#0d1117" stroke="#30363d"/>')
 
-          # Top icon (neutral accent, not logo copy)
-          svg.append('<circle cx="32" cy="34" r="11" fill="#ffb454"/>')
+          # top-left accent
+          svg.append('<circle cx="32" cy="34" r="11" fill="#f0b454"/>')
           svg.append('<circle cx="32" cy="34" r="4.5" fill="#0d1117"/>')
 
-          # Header
+          # header
           svg.append(f'<text x="56" y="41" class="title">{USERNAME}</text>')
-          svg.append(f'<text x="605" y="38" text-anchor="end" class="topmain">{total_solved} solved</text>')
-          svg.append(f'<text x="605" y="58" text-anchor="end" class="topsub">{analytical_solved} analytical · {algorithms_solved} algorithm</text>')
+          svg.append(f'<text x="605" y="38" text-anchor="end" class="headline">{total_solved} solved</text>')
+          svg.append(f'<text x="605" y="60" text-anchor="end" class="meta">{analytical_solved} analytical · {algorithms_solved} algorithm</text>')
 
-          # Left ring
+          # left ring
           svg.append('<circle cx="83" cy="152" r="46" fill="none" stroke="#30363d" stroke-width="8"/>')
-          svg.append(f'<circle cx="83" cy="152" r="{r}" fill="none" stroke="#ffb454" stroke-width="8" stroke-linecap="round" stroke-dasharray="{dash:.2f} {circ:.2f}" transform="rotate(-90 83 152)"/>')
+          svg.append(f'<circle cx="83" cy="152" r="{r}" fill="none" stroke="#f0b454" stroke-width="8" stroke-linecap="round" stroke-dasharray="{dash:.2f} {circ:.2f}" transform="rotate(-90 83 152)"/>')
           svg.append(f'<text x="83" y="160" text-anchor="middle" class="ringnum">{analytical_solved}</text>')
-          svg.append('<text x="83" y="182" text-anchor="middle" class="ringsub">Analytical</text>')
+          svg.append('<text x="83" y="184" text-anchor="middle" class="ringsub">Analytical</text>')
 
-          # Difficulty bars
+          # difficulty bars
           bar_x = 190
           bar_w = 350
           bg = "#3b4048"
 
           rows = [
-              ("Easy", easy_solved, easy_all, "#6cc46e", 110),
-              ("Medium", medium_solved, medium_all, "#f0b44c", 160),
-              ("Hard", hard_solved, hard_all, "#ef6b73", 210),
+              ("Easy", easy_solved, easy_all, "#78c273", 110),
+              ("Medium", medium_solved, medium_all, "#e3b24b", 160),
+              ("Hard", hard_solved, hard_all, "#e46d76", 210),
           ]
 
           for name, solved_n, total_n, color, y in rows:
@@ -213,18 +210,18 @@ jobs:
               svg.append(f'<rect x="{bar_x}" y="{y + 12}" width="{bar_w}" height="6" rx="3" fill="{bg}"/>')
               svg.append(f'<rect x="{bar_x}" y="{y + 12}" width="{progress_width(solved_n, total_n, bar_w):.2f}" height="6" rx="3" fill="{color}"/>')
 
-          # Separator
-          svg.append('<line x1="20" y1="252" x2="620" y2="252" stroke="#30363d"/>')
+          # separator
+          svg.append('<line x1="20" y1="248" x2="620" y2="248" stroke="#30363d"/>')
 
-          # Heatmap header
-          svg.append('<text x="20" y="285" class="heatTitle">Heatmap (Last 52 Weeks)</text>')
-          svg.append(f'<text x="620" y="285" text-anchor="end" class="tiny">🔥 {streak} day streak</text>')
+          # heatmap header
+          svg.append('<text x="20" y="278" class="heatTitle">Heatmap (Last 52 Weeks)</text>')
+          svg.append(f'<text x="604" y="278" text-anchor="end" class="meta">🔥 {streak} day streak</text>')
 
-          # Heatmap cells
-          cell = 7
+          # heatmap grid
+          cell = 9
           gap = 2
           grid_x = 20
-          grid_y = 303
+          grid_y = 295
 
           days = [start_day + timedelta(days=i) for i in range(364)]
           for idx, d in enumerate(days):
@@ -233,10 +230,7 @@ jobs:
               x = grid_x + col * (cell + gap)
               y = grid_y + row * (cell + gap)
               c = counts.get(d, 0)
-              svg.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="1.5" fill="{heat_color(c)}"/>')
-
-          svg.append(f'<text x="{grid_x}" y="363" class="tiny">{fmt_date(start_day)}</text>')
-          svg.append(f'<text x="{grid_x + 52 * (cell + gap) - gap}" y="363" text-anchor="end" class="tiny">{fmt_date(today)}</text>')
+              svg.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="2" fill="{heat_color(c)}"/>')
 
           svg.append('</svg>')
 
