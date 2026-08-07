@@ -16,8 +16,9 @@ Hi there 👋
 - Regulated cell death
 - Computational biology and bioinformatics
 
-[![LeetCode Stats](https://leetcode-stats-card.vercel.app/get?username=maellomir&theme=nord)](https://leetcode.com/maellomir)
-		  
+
+<img src="https://leetcard.jacoblin.cool/maellomir?theme=dark&font=Inter&ext=heatmap" width="280" />
+
 My Tech Stack:
 ---
 <div >
